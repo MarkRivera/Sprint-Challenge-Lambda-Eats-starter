@@ -12,6 +12,35 @@ function Pizza () {
        quantity: "1"
     });
 
+    const removeTopping = (arr, event) => {
+        console.log(arr);
+       let newTop = [...arr].filter(item => item !== event.target.value);
+       console.log(newTop)
+
+       return newTop
+    }
+
+    const changeHandler = event => {
+        // If a checkbox item is checked add to state, if unchecked, remove from state.
+        event.persist();
+
+        if(event.target.type === "checkbox") {      
+            event.target.checked? setPizza({
+                    ...pizza,
+                    [event.target.name]:  [...pizza.toppings, event.target.value]
+                }) : setPizza(prevState => {
+                    return {
+                        ...prevState,
+                        [event.target.name]:  removeTopping(prevState.toppings, event)
+                    }
+                });
+        }
+    };
+
+    const formSubmit = event => {
+        event.preventDefault();
+    }
+
     return (
         <form>
             {/* Size */}
@@ -21,7 +50,7 @@ function Pizza () {
                     <small>required</small>
                 </div>
 
-                <select type="select" name="size">
+                <select type="select" name="size" onChange={e => changeHandler(e) }>
                     <option value="Small">Small</option>
                     <option value="Medium">Medium</option>
                     <option value="Large">Large</option>
@@ -35,22 +64,22 @@ function Pizza () {
                     <small>required</small>
                 </div>
                 <label htmlFor="radio-labels" className="radio-labels">
-                    <input type="radio" value="Original Ranch" name="sauce" defaultChecked />
+                    <input type="radio" value="Original Ranch" name="sauce" defaultChecked onChange={e => changeHandler(e) }/>
                     Original Ranch
                 </label>
 
                 <label htmlFor="radio-labels" className="radio-labels">
-                    <input type="radio" value="Garlic Ranch" name="sauce" />
+                    <input type="radio" value="Garlic Ranch" name="sauce" onChange={e => changeHandler(e) }/>
                     Garlic Ranch
                 </label>
 
                 <label htmlFor="radio-labels" className="radio-labels">
-                    <input type="radio" value="BBQ Sauce" name="sauce" />
+                    <input type="radio" value="BBQ Sauce" name="sauce" onChange={e => changeHandler(e) }/>
                     BBQ Sauce
                 </label>
 
                 <label htmlFor="radio-labels" className="radio-labels">
-                    <input type="radio" value="Spinach Alfredo" name="sauce" />
+                    <input type="radio" value="Spinach Alfredo" name="sauce" onChange={e => changeHandler(e) }/>
                     Spinach Alfredo
                 </label>
             </label>
@@ -59,14 +88,14 @@ function Pizza () {
             <label htmlFor="toppings">
                 <div>
                     <p>Add Toppings</p>
-                    <small>Choose Up To 10</small>
+                    <small>Choose Any</small>
                 </div>
 
                 <label htmlFor="topping-labels" className="topping-labels">
                     {toppings.map(topping => {
                         return (
                             <label className="topping">
-                                <input type="checkbox" name="toppings" value={topping} checked={false} />
+                                <input type="checkbox" name="toppings" value={topping} onChange={e => changeHandler(e) }/>
                                 {topping}
                             </label>
                         )
