@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as Yup from "yup";
+import axios from 'axios';
 
 function Pizza () {
     const [toppings, setToppings] = useState(["Pepperoni", "Sausage", "Canadian Bacon", "Spicy Italian Sausage", "Grilled Chicken", "Onions", "Green Pepper", "Diced Tomatoes", "Black Olives", "Roasted Garlic", "Artichoke Hearts", "Three Cheese", "Pineapple", "Extra Cheese"]);
@@ -50,6 +51,11 @@ function Pizza () {
     }
 
 
+    // Axios Data
+
+    const [post, setPost] = useState([]);
+
+
 
     // Form handlers
     const removeTopping = (arr, event) => {
@@ -94,6 +100,12 @@ function Pizza () {
 
     const formSubmit = event => {
         event.preventDefault();
+        axios
+            .post("https://reqres.in/api/users", pizza)
+            .then(response => {
+                setPost(response.data);
+                console.log("success", response)
+            })
     }
 
     return (
@@ -190,7 +202,7 @@ function Pizza () {
 
             <div className="amount-section">
                 <input type="number" min="1" max="10" name="quantity" onChange={ event => handleChange(event) } value={pizza.quantity} />
-                <button className="submit-btn" disabled={buttonDisabled} >
+                <button className="submit-btn" disabled={buttonDisabled} onClick={ event => formSubmit(event)} >
                     <span className="final-command">Add to order</span>
                     <span className="price">$17.99</span>
                 </button>
