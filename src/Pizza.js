@@ -1,30 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import * as Yup from "yup";
 
 function Pizza () {
     const [toppings, setToppings] = useState(["Pepperoni", "Sausage", "Canadian Bacon", "Spicy Italian Sausage", "Grilled Chicken", "Onions", "Green Pepper", "Diced Tomatoes", "Black Olives", "Roasted Garlic", "Artichoke Hearts", "Three Cheese", "Pineapple", "Extra Cheese"]);
 
     const [pizza, setPizza] = useState({
+       name: "",
        size: "Small",
        sauce: "Original Ranch",
        toppings: [],
        substitute: true,
        special: "",
-       quantity: "1"
+       quantity: "1",
     });
 
-    const removeTopping = (arr, event) => {
-        console.log(arr);
-       let newTop = [...arr].filter(item => item !== event.target.value);
-       console.log(newTop)
+    // Validation
 
+    const [errors, setErrors] = useState({
+        name: ""
+     });
+
+    const [buttonDisabled, setButtonDisabled] = useState(true);
+    
+    const formSchema = Yup.object().shape({
+        name: Yup
+            .string()
+            .min(2, "Your name must be longer than 2 characters")
+            .required("Name is required")
+    });
+
+    useEffect(() => {
+        formSchema.isValid(pizza).then(valid => {
+            setButtonDisabled(!valid);
+        })
+    }, [pizza])
+
+    const validateChange = event => {
+        Yup.reach(formSchema, event.target.name).validate(event.target.value).then(valid => {
+             setErrors({
+                 ...errors,
+                 [event.target.name]: ""
+             })
+        }).catch(err => {
+            setErrors({
+                ...errors,
+                [event.target.name]: err.errors[0]
+            })
+        })
+    }
+
+
+
+    // Form handlers
+    const removeTopping = (arr, event) => {
+       let newTop = [...arr].filter(item => item !== event.target.value);
        return newTop
     }
 
-    const changeHandler = event => {
+    const handleChange = event => {
         // If a checkbox item is checked add to state, if unchecked, remove from state.
         event.persist();
 
-        if(event.target.type === "checkbox") {      
+        if(event.target.type === "checkbox" && event.target.name !== "substitute") {      
             event.target.checked? setPizza({
                     ...pizza,
                     [event.target.name]:  [...pizza.toppings, event.target.value]
@@ -34,6 +71,24 @@ function Pizza () {
                         [event.target.name]:  removeTopping(prevState.toppings, event)
                     }
                 });
+        } else if (event.target.type === "checkbox" && event.target.name === "substitute") {
+            // Event is checkbox but not a topping
+
+            event.target.checked? setPizza({
+                ...pizza,
+                [event.target.name]: true
+            }): setPizza({
+                ...pizza,
+                [event.target.name]: false
+            })
+
+        } else {
+            // Event is something else
+            validateChange(event);
+            setPizza({
+                ...pizza,
+                [event.target.name]: event.target.value
+            });
         }
     };
 
@@ -43,6 +98,14 @@ function Pizza () {
 
     return (
         <form>
+             <label htmlFor="name">
+                <div>
+                    <p>Name</p>
+                </div>
+                <input type="text" placeholder="Full Name" name="name" onChange={event => handleChange(event)} value={pizza.name} />
+                { errors.name.length > 0? (<p>{errors.name}</p>): null }
+            </label>
+
             {/* Size */}
             <label htmlFor="size">
                 <div>
@@ -50,7 +113,7 @@ function Pizza () {
                     <small>required</small>
                 </div>
 
-                <select type="select" name="size" onChange={e => changeHandler(e) }>
+                <select type="select" name="size" onChange={e => handleChange(e) }>
                     <option value="Small">Small</option>
                     <option value="Medium">Medium</option>
                     <option value="Large">Large</option>
@@ -64,22 +127,22 @@ function Pizza () {
                     <small>required</small>
                 </div>
                 <label htmlFor="radio-labels" className="radio-labels">
-                    <input type="radio" value="Original Ranch" name="sauce" defaultChecked onChange={e => changeHandler(e) }/>
+                    <input type="radio" value="Original Ranch" name="sauce" defaultChecked onChange={e => handleChange(e) }/>
                     Original Ranch
                 </label>
 
                 <label htmlFor="radio-labels" className="radio-labels">
-                    <input type="radio" value="Garlic Ranch" name="sauce" onChange={e => changeHandler(e) }/>
+                    <input type="radio" value="Garlic Ranch" name="sauce" onChange={e => handleChange(e) }/>
                     Garlic Ranch
                 </label>
 
                 <label htmlFor="radio-labels" className="radio-labels">
-                    <input type="radio" value="BBQ Sauce" name="sauce" onChange={e => changeHandler(e) }/>
+                    <input type="radio" value="BBQ Sauce" name="sauce" onChange={e => handleChange(e) }/>
                     BBQ Sauce
                 </label>
 
                 <label htmlFor="radio-labels" className="radio-labels">
-                    <input type="radio" value="Spinach Alfredo" name="sauce" onChange={e => changeHandler(e) }/>
+                    <input type="radio" value="Spinach Alfredo" name="sauce" onChange={e => handleChange(e) }/>
                     Spinach Alfredo
                 </label>
             </label>
@@ -95,7 +158,7 @@ function Pizza () {
                     {toppings.map(topping => {
                         return (
                             <label className="topping">
-                                <input type="checkbox" name="toppings" value={topping} onChange={e => changeHandler(e) }/>
+                                <input type="checkbox" name="toppings" value={topping} onChange={e => handleChange(e) }/>
                                 {topping}
                             </label>
                         )
@@ -110,7 +173,7 @@ function Pizza () {
                     <small>Choose Up To 1</small>
                 </div>
                 <label htmlFor="substitute-label">
-                    <input type="checkbox" name="substitute" value="true" checked={true} />
+                    <input type="checkbox" name="substitute" value={pizza.substitute} checked={pizza.substitute}  onChange={event => handleChange(event)} />
                     Gluten Free Crust
                 </label>
             </label>
@@ -120,19 +183,18 @@ function Pizza () {
                 <div>
                     <p>Special Instructions</p>
                 </div>
-                <input type="text" placeholder="Anything else you'd like to add?" name="special" />
+                <input type="text" placeholder="Anything else you'd like to add?" name="special" onChange={event => handleChange(event)} />
             </label>
 
             {/* Quantity and Amount */}
 
             <div className="amount-section">
-                <input type="number" min="1" max="10" name="quantity" />
-                <button className="submit-btn">
+                <input type="number" min="1" max="10" name="quantity" onChange={ event => handleChange(event) } value={pizza.quantity} />
+                <button className="submit-btn" disabled={buttonDisabled} >
                     <span className="final-command">Add to order</span>
                     <span className="price">$17.99</span>
                 </button>
             </div>
-
         </form>
     )
 }
