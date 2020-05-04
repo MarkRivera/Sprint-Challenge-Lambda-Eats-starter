@@ -114,7 +114,7 @@ function Pizza () {
                 <div>
                     <p>Name</p>
                 </div>
-                <input type="text" placeholder="Full Name" name="name" onChange={event => handleChange(event)} value={pizza.name} />
+                <input type="text" placeholder="Full Name" data-cy="name" name="name" onChange={event => handleChange(event)} value={pizza.name} />
                 { errors.name.length > 0? (<p>{errors.name}</p>): null }
             </label>
 
@@ -170,7 +170,7 @@ function Pizza () {
                     {toppings.map(topping => {
                         return (
                             <label className="topping">
-                                <input type="checkbox" name="toppings" value={topping} onChange={e => handleChange(e) }/>
+                                <input type="checkbox" name="toppings" value={topping} onChange={e => handleChange(e)} data-cy={topping} />
                                 {topping}
                             </label>
                         )
@@ -202,7 +202,7 @@ function Pizza () {
 
             <div className="amount-section">
                 <input type="number" min="1" max="10" name="quantity" onChange={ event => handleChange(event) } value={pizza.quantity} />
-                <button className="submit-btn" disabled={buttonDisabled} onClick={ event => formSubmit(event)} >
+                <button className="submit-btn" disabled={buttonDisabled} onClick={ event => formSubmit(event)} data-cy="sub" >
                     <span className="final-command">Add to order</span>
                     <span className="price">$17.99</span>
                 </button>

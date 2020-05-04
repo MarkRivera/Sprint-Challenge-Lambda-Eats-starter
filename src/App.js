@@ -19,7 +19,7 @@ const App = () => {
         <header>
           <h1>Build Your Own Pizza</h1>
           <div>image of pizza</div>
-          <Link to="/pizza">Start</Link>
+          <Link to="/pizza" data-cy="pizza-time">Start</Link>
         </header>
 
         <Route path="/pizza" component={Pizza} />
